@@ -28,11 +28,11 @@
         data() {
             return {
                 dices: [
-                    {id: 0, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
-                    {id: 1, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
-                    {id: 2, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
-                    {id: 3, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
-                    {id: 4, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false}
+                    {id: 0, diceValue: 0, diceImg: require('../assets/diceempty.png'), keep: false},
+                    {id: 1, diceValue: 0, diceImg: require('../assets/diceempty.png'), keep: false},
+                    {id: 2, diceValue: 0, diceImg: require('../assets/diceempty.png'), keep: false},
+                    {id: 3, diceValue: 0, diceImg: require('../assets/diceempty.png'), keep: false},
+                    {id: 4, diceValue: 0, diceImg: require('../assets/diceempty.png'), keep: false}
                 ],
                 player: 1,
                 tries: 3,
@@ -41,7 +41,9 @@
         },
         methods : {
             showDice(elt) {
-                if (elt.diceValue === 1) {
+                if (elt.diceValue === 0) {
+                    elt.diceImg = require("../assets/diceempty.png")
+                } else if (elt.diceValue === 1) {
                     elt.diceImg = require("../assets/dice1.png")
                 } else if (elt.diceValue === 2) {
                     elt.diceImg = require('../assets/dice2.png')
@@ -63,6 +65,10 @@
                     this.player = 1
                 }
                 this.disableRoll = false
+                for (let dice of this.dices) {
+                    dice.diceValue = 0
+                    this.showDice(dice)
+                }
             },
             roll() {
                 for (let dice of this.dices) {

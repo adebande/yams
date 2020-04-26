@@ -1,7 +1,7 @@
 <template>
     <div id="dices">
         <p>Player {{player}}</p>
-        <p>{{tries}} tries left.</p>
+        <p>{{tries}} {{triesText}} left.</p>
         <div id="dicesImages">
             <img :src="dices[0].diceImg">
             <input type="checkbox" v-model="dices[0].keep">
@@ -16,7 +16,7 @@
         </div>
         <div id="rollButton">
             <b-button class="buttons" @click="roll" :disabled="disableRoll">Roll</b-button>
-            <b-button class="buttons" @click="nextPlayer">Next Player</b-button>
+            <b-button class="buttons" @click="nextPlayer" :disabled="disableNextPlayer">Next Player</b-button>
         </div>
     </div>
 </template>
@@ -36,7 +36,9 @@
                 ],
                 player: 1,
                 tries: 3,
+                triesText : 'tries',
                 disableRoll : false,
+                disableNextPlayer : true,
             }
         },
         methods : {
@@ -67,8 +69,10 @@
                 this.disableRoll = false
                 for (let dice of this.dices) {
                     dice.diceValue = 0
+                    dice.keep = false
                     this.showDice(dice)
                 }
+                this.disableNextPlayer = true
             },
             roll() {
                 for (let dice of this.dices) {
@@ -78,9 +82,13 @@
                     }
                 }
                 this.tries -= 1
+                if (this.tries <= 1) {
+                    this.triesText = "try"
+                }
                 if (this.tries === 0) {
                     this.disableRoll = true
-                } 
+                }
+                this.disableNextPlayer = false 
             },
         },
     }

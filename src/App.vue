@@ -3,20 +3,20 @@
     <div id="header">
       <b-jumbotron fluid header="Yam's" lead="2 players game"></b-jumbotron>
     </div>
-    <div id="dice">
-      <dice></dice>
+    <div id="dices">
+      <dices></dices>
     </div>
   </div>
 </template>
 
 <script>
 
-import dice from './components/dice'
+import dices from './components/dices'
 
 export default {
   name: 'App',
   components: {
-    dice
+    dices
   }
 }
 </script>
@@ -27,7 +27,7 @@ export default {
 
 }
 
-#dice {
+#dices {
   text-align: center;
 }
 

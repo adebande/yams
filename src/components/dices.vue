@@ -1,5 +1,7 @@
 <template>
     <div id="dices">
+        <p>Player {{player}}</p>
+        <p>{{tries}} tries left.</p>
         <div id="dicesImages">
             <img :src="dices[0].diceImg">
             <input type="checkbox" v-model="dices[0].keep">
@@ -13,7 +15,8 @@
             <input type="checkbox" v-model="dices[4].keep">
         </div>
         <div id="rollButton">
-            <b-button @click="roll">Roll</b-button>
+            <b-button class="buttons" @click="roll" :disabled="disableRoll">Roll</b-button>
+            <b-button class="buttons" @click="nextPlayer">Next Player</b-button>
         </div>
     </div>
 </template>
@@ -30,7 +33,10 @@
                     {id: 2, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
                     {id: 3, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false},
                     {id: 4, diceValue: 6, diceImg: require('../assets/dice6.png'), keep: false}
-                ]
+                ],
+                player: 1,
+                tries: 3,
+                disableRoll : false,
             }
         },
         methods : {
@@ -49,6 +55,15 @@
                     elt.diceImg = require('../assets/dice6.png')  
                 }
             },
+            nextPlayer() {
+                this.tries = 3
+                if (this.player === 1) {
+                    this.player = 2
+                } else if (this.player === 2) {
+                    this.player = 1
+                }
+                this.disableRoll = false
+            },
             roll() {
                 for (let dice of this.dices) {
                     if (dice.keep === false) {
@@ -56,6 +71,10 @@
                         this.showDice(dice)
                     }
                 }
+                this.tries -= 1
+                if (this.tries === 0) {
+                    this.disableRoll = true
+                } 
             },
         },
     }
@@ -69,6 +88,10 @@
 
 #rollButton {
     padding: 5px;
+}
+
+#rollButton .buttons {
+    margin: 5px;
 }
 
 </style>

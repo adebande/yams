@@ -624,10 +624,6 @@
 
 <style>
 
-#dicesImages {
-
-}
-
 #dicesImages .inactiveDice {
     margin: 12px;
 }

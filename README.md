@@ -1,24 +1,17 @@
-# yams
+# Yam's
 
-## Project setup
-```
-npm install
-```
+A simple 2 players Yam's / Yahtzee game, made with Javascript / Vue.js.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## How to play
 
-### Compiles and minifies for production
-```
-npm run build
-```
+To start playing, press "Roll" to roll all the dices.
 
-### Lints and fixes files
-```
-npm run lint
-```
+You've got 3 attempts to get one of the dices combinations.
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+For each attempt, you can choose to re-roll as many dices as you want. Simply click on the dices you want to re-roll and press "Roll".
+
+You can also choose which cell of the grid you want to fill. Choose among the items on the scrolling menu and press "Submit".
+
+Then press "Next Player" to skip to player 2.
+
+For detailed Yam's / Yahtzee rules you may visit this Wikipedia page.

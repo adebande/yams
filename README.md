@@ -14,4 +14,4 @@ You can also choose which cell of the grid you want to fill. Choose among the it
 
 Then press "Next Player" to skip to player 2.
 
-For detailed Yam's / Yahtzee rules you may visit this Wikipedia page.
+For detailed Yam's / Yahtzee rules you may visit the Wikipedia page.

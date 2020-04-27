@@ -1,36 +1,45 @@
 <template>
-    <div id="dices">
-        <b-container>
-            <p><strong>Player {{player}} turn</strong></p>
-            <p><strong>{{tries}}</strong> {{triesText}} left.</p>
-            <div id="dicesImages">
-                <img :src="dices[0].diceImg" :class="dices[0].activeDice" @click="rerollDice(dices[0])">
-                <img :src="dices[1].diceImg" :class="dices[1].activeDice" @click="rerollDice(dices[1])">
-                <img :src="dices[2].diceImg" :class="dices[2].activeDice" @click="rerollDice(dices[2])">
-                <img :src="dices[3].diceImg" :class="dices[3].activeDice" @click="rerollDice(dices[3])">
-                <img :src="dices[4].diceImg" :class="dices[4].activeDice" @click="rerollDice(dices[4])">
-            </div>
-            <div id="selector"> 
-                <p v-if="!selected && tries === 3"> <strong>Player {{player}}: Roll the dices !! </strong></p>
-                <p v-if="!selected && tries < 3 && tries > 0"> <strong>Player {{player}}: Roll again or select a combination to submit ({{tries}} {{triesText}} left.) </strong></p>
-                <p v-if="!selected && tries === 0"> <strong>Player {{player}}: Select a combination to submit.</strong></p>
-                <p v-if="selected && tries === 0 && submitted===false"> <strong>Player {{player}}: Choose a combination and press Submit. Your score will be added to the sheet.</strong></p>
-                <p v-if="selected && tries > 0 && submitted===false"> <strong>Player {{player}}: Roll again or submit this combination ({{tries}} {{triesText}} left.).</strong></p>
-                <p v-if="pressNext && submitted"> <strong> Press "Next Player" button</strong></p> 
-                <b-select v-model="selected" :options="combinations" @input="showCount"></b-select>
-                <div class="mt-3">Selected: <strong>{{ selected }} ( {{ptsCount}} points )</strong></div>
-            </div>
-            <div id="rollButton">
-                <b-button class="buttons" @click="roll" :disabled="disableRoll">Roll</b-button>
-                <b-button class="buttons" @click="submitCombination" :disabled="disableSubmit">Submit</b-button>
-                <b-button class="buttons" @click="nextPlayer" :disabled="disableNextPlayer">Next Player</b-button>
-            </div>
-            <div id="scoreSheet">
-                <div>
-                    <b-table :items="turns" :fields="sheetFields"></b-table>
+    <div>
+        <div id="dices" v-show ="gameStatus < 24 ">
+            <b-container>
+                <p><strong>Player {{player}} turn</strong></p>
+                <p><strong>{{tries}}</strong> {{triesText}} left.</p>
+                <div id="dicesImages">
+                    <img :src="dices[0].diceImg" :class="dices[0].activeDice" @click="rerollDice(dices[0])">
+                    <img :src="dices[1].diceImg" :class="dices[1].activeDice" @click="rerollDice(dices[1])">
+                    <img :src="dices[2].diceImg" :class="dices[2].activeDice" @click="rerollDice(dices[2])">
+                    <img :src="dices[3].diceImg" :class="dices[3].activeDice" @click="rerollDice(dices[3])">
+                    <img :src="dices[4].diceImg" :class="dices[4].activeDice" @click="rerollDice(dices[4])">
                 </div>
-            </div>
-        </b-container>
+                <div id="selector"> 
+                    <p v-if="!selected && tries === 3"> <strong>Player {{player}}: Roll the dices !! </strong></p>
+                    <p v-if="!selected && tries < 3 && tries > 0"> <strong>Player {{player}}: Roll again or select a combination to submit ({{tries}} {{triesText}} left) </strong></p>
+                    <p v-if="!selected && tries === 0"> <strong>Player {{player}}: Select a combination to submit.</strong></p>
+                    <p v-if="selected && tries === 0 && submitted===false"> <strong>Player {{player}}: Choose a combination and press Submit. Your score will be added to the sheet.</strong></p>
+                    <p v-if="selected && tries > 0 && submitted===false"> <strong>Player {{player}}: Roll again or submit this combination ({{tries}} {{triesText}} left)</strong></p>
+                    <p v-if="pressNext && submitted"> <strong> Press "Next Player" button</strong></p> 
+                    <b-select v-model="selected" :options="combinations" @input="showCount"></b-select>
+                    <div class="mt-3">Selected: <strong>{{ selected }} ( {{ptsCount}} points )</strong></div>
+                </div>
+                <div id="rollButton">
+                    <b-alert v-if="combError" show variant="danger">Error : combination already registered. Try another one. </b-alert>
+                    <b-button class="buttons" variant="success" @click="roll" :disabled="disableRoll"><strong>Roll</strong></b-button>
+                    <b-button class="buttons" variant="success" @click="submitCombination" :disabled="disableSubmit">Submit</b-button>
+                    <b-button class="buttons" variant="success" @click="nextPlayer" :disabled="disableNextPlayer">Next Player</b-button>
+                </div>
+            </b-container>
+        </div>
+        <div v-if="gameStatus === 24" id="winner">
+            <p class="display-4">{{gameWinner}} wins !</p>
+            <p>PLAYER 1 - <strong>{{turns[16].player_1}} pts.</strong></p> 
+            <p>PLAYER 2 - <strong>{{turns[16].player_2}} pts.</strong></p>
+            <p>Click "New Game" to play again.</p>
+        </div>
+        <div id="scoreSheet">
+            <b-container>
+                <b-table :items="turns" :fields="sheetFields"></b-table>
+            </b-container>
+        </div>
     </div>
 </template>
 
@@ -38,8 +47,10 @@
 <script>
     export default {
         name: 'dices',
-        data() {
+        data : function() {
             return {
+                gameStatus:0,
+                gameWinner:null,
                 dices: [
                     {id: 0, diceValue: 0, diceImg: require('../assets/diceempty.png'), reroll: true, activeDice: "activeDice"},
                     {id: 1, diceValue: 0, diceImg: require('../assets/diceempty.png'), reroll: true, activeDice: "activeDice"},
@@ -54,6 +65,7 @@
                 disableSubmit : true,
                 pressNext : false,
                 submitted : false,
+                combError : false,
                 disableNextPlayer : true,
                 count : 0,
                 ptsCount: null,
@@ -138,6 +150,7 @@
                 this.turns[16]._rowVariant ="success"
             },
             nextPlayer() {
+                this.gameStatus ++
                 this.submitted = false
                 this.pressNext = false
                 this.tries = 3
@@ -164,6 +177,15 @@
                     this.showDice(dice)
                 }
                 this.disableNextPlayer = true
+                if (this.gameStatus === 24) {
+                    if (this.turns[16].player_1 > this.turns[16].player_2) {
+                        this.gameWinner = "Player 1"
+                    } else if (this.turns[16].player_1 === this.turns[16].player_2) {
+                        this.gameWinner = "No one"
+                    } else if (this.turns[16].player_1 < this.turns[16].player_2) {
+                        this.gameWinner = "Player 2"
+                    }
+                }
             },
             counter(elt, d1, d2, d3, d4, d5) {
                 this.count = 0
@@ -234,56 +256,129 @@
                 if (this.tries < 3) {
                     switch (this.selected) {
                         case "One":
-                            this.ptsCount = this.combinations[1].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[1].p1 === true) || (this.player == 2 && this.combinations[1].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[1].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Two":
-                            this.ptsCount = this.combinations[2].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[2].p1 === true) || (this.player == 2 && this.combinations[2].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[2].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Three":
-                            this.ptsCount = this.combinations[3].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[3].p1 === true) || (this.player == 2 && this.combinations[3].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[3].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Four":
-                            this.ptsCount = this.combinations[4].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[4].p1 === true) || (this.player == 2 && this.combinations[4].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[4].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Five":
-                            this.ptsCount = this.combinations[5].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[5].p1 === true) || (this.player == 2 && this.combinations[5].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[5].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Six":
-                            this.ptsCount = this.combinations[6].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[6].p1 === true) || (this.player == 2 && this.combinations[6].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[6].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Plus":
-                            this.ptsCount = this.combinations[7].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[7].p1 === true) || (this.player == 2 && this.combinations[7].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[7].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Minus":
-                            this.ptsCount = this.combinations[8].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[8].p1 === true) || (this.player == 2 && this.combinations[8].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[8].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Straight":
-                            this.ptsCount = this.combinations[9].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[9].p1 === true) || (this.player == 2 && this.combinations[9].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[9].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Full":
-                            this.ptsCount = this.combinations[10].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[10].p1 === true) || (this.player == 2 && this.combinations[10].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[10].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "4 of a kind":
-                            this.ptsCount = this.combinations[11].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[11].p1 === true) || (this.player == 2 && this.combinations[11].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[11].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         case "Yam's":
-                            this.ptsCount = this.combinations[12].points
-                            this.disableSubmit = false
+                            if ((this.player == 1 && this.combinations[12].p1 === true) || (this.player == 2 && this.combinations[12].p2 === true)) {
+                                this.disableSubmit = true
+                                this.combError = true
+                            } else {
+                                this.ptsCount = this.combinations[12].points
+                                this.disableSubmit = false
+                                this.combError = false
+                            }
                             break;
                         default:
                             this.ptsCount = null
                             this.disableSubmit = true
+                            this.combError = false
                     }
                 }
             },
@@ -310,7 +405,6 @@
                 this.calculCarre()
                 this.calculYams()
                 this.showCount()
-                this.ptsCount = null
                 if (this.player == 1) {
                     for (let combination of this.combinations) {
                         if (combination.p1 === true) {
